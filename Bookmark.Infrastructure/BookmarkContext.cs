@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bookmark.Core;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -9,6 +10,8 @@ namespace Bookmark.Infrastructure
 {
     public class BookmarkContext : DbContext
     {
+        public DbSet<Core.Bookmark> Bookmarks { get; set; }
 
+        public DbSet<Tag> Tags { get; set; }
     }
 }
