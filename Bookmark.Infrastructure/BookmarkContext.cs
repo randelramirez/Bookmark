@@ -10,6 +10,10 @@ namespace Bookmark.Infrastructure
 {
     public class BookmarkContext : DbContext
     {
+        public BookmarkContext() : base ("BookmarkContext")
+        {
+        }
+
         public DbSet<Core.Bookmark> Bookmarks { get; set; }
 
         public DbSet<Tag> Tags { get; set; }

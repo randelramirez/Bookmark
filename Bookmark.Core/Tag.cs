@@ -12,8 +12,7 @@ namespace Bookmark.Core
 
         public string Text { get; set; }
 
-        // might change this to ICollection, reason is existing bookmarks can be used from the UI for assigning tags
         // we have a table for bookmarks, tags, and table with composite keys BookmarkTag
-        public Bookmark Bookmark { get; set; }
+        public virtual ICollection<Bookmark> Bookmarks { get; set; }
     }
 }
