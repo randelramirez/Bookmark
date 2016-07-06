@@ -1,0 +1,17 @@
+﻿@model Bookmark.Core.Bookmark
+@{
+    ViewBag.Title = "Delete";
+}
+
+<h2>Delete</h2>
+
+@using (Html.BeginForm("Delete","Bookmarks",FormMethod.Post)) {
+    <fieldset>
+        <legend>Bookmarks</legend>
+        <div>
+            @Html.LabelFor(b => b.Description)
+            @Html.TextBoxFor(b => b.Description)
+        </div>
+        <input type="submit" value="Delete" />
+    </fieldset>
+}

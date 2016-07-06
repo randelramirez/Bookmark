@@ -1,0 +1,36 @@
+﻿@model IEnumerable<Bookmark.Core.Bookmark>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th>Title</th>
+            <th>URL</th>
+            <th>Tags</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var bookmark in Model)
+        {
+            <tr>
+                <td>@bookmark.Description</td>
+                <td>@bookmark.Article.Title</td>
+                <td>@bookmark.Article.URL</td>
+                <td>
+                    <ul>
+                        @foreach (var tag in bookmark.Tags)
+                        {
+                            <li>@tag.Text</li>
+                        }
+                    </ul>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

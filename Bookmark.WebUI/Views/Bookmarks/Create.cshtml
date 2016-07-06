@@ -1,0 +1,25 @@
+﻿@model Bookmark.Core.Bookmark
+@{
+    ViewBag.Title = "Create";
+}
+
+<h2>Create</h2>
+
+@using (Html.BeginForm("Create","Bookmarks",FormMethod.Post)){
+    <fieldset>
+        <legend>Bookmarks</legend>
+        <div>
+            <label for="description">Description</label>
+            @Html.TextBoxFor(b => b.Description)
+        </div>
+        <div>
+            <label for="description">Description</label>
+            @Html.TextBoxFor(b => b.Article.Title)
+        </div>
+        <div>
+            <label for="description">Description</label>
+            @Html.TextBoxFor(b => b.Article.URL)
+        </div>
+        <input type="submit" value="Save" />
+    </fieldset>
+}
