@@ -1,0 +1,25 @@
+﻿@model Bookmark.Core.Bookmark
+
+@{
+    ViewBag.Title = "Edit";
+}
+
+<h2>Edit</h2>
+
+@using (Html.BeginForm("Edit","Bookmarks",FormMethod.Post)) {
+@Html.AntiForgeryToken()
+
+    <fieldset>
+        <legend>Bookmarks</legend>
+        <div>
+            @Html.LabelFor(m => m.Description)
+            @Html.TextBoxFor(m => m.Description)
+        </div>
+        <div>
+            @Html.LabelFor(m => m.Article.Title)
+            @Html.TextBoxFor(m => m.Article.Title)
+        </div>
+        @Html.HiddenFor(m => m.Id)
+        <input type="submit" value="Save" />
+    </fieldset>
+}
