@@ -12,6 +12,7 @@ namespace Bookmark.Core
         public Bookmark()
         {
             this.DateSaved = DateTime.UtcNow;
+            this.Tags = new HashSet<Tag>();
         }
 
         public int Id { get; set; }

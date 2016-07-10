@@ -28,9 +28,7 @@
         <input type="submit" value="Save" />
     </fieldset>
 }
-<div>
-    @Html.TextBox("tags2", null, new { id = "tags2" })
-</div>
+
 
 
 
@@ -50,12 +48,5 @@
         });
     </script>
 
-<script>
-        $('#tags2').tagit({
-            autocomplete: {
-                source: "@Url.Action("GetTags2")"
-                }
-        });
-</script>
 }
 
