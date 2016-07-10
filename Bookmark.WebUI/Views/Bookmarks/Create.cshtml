@@ -5,7 +5,9 @@
 
 <h2>Create</h2>
 
-@using (Html.BeginForm("Create","Bookmarks",FormMethod.Post)){
+@using (Html.BeginForm("Create", "Bookmarks", FormMethod.Post))
+{
+    @Html.AntiForgeryToken();
     <fieldset>
         <legend>Bookmarks</legend>
         <div>
@@ -13,13 +15,47 @@
             @Html.TextBoxFor(b => b.Description)
         </div>
         <div>
-            <label for="description">Description</label>
+            <label for="description">Title</label>
             @Html.TextBoxFor(b => b.Article.Title)
         </div>
         <div>
-            <label for="description">Description</label>
+            <label for="description">URL</label>
             @Html.TextBoxFor(b => b.Article.URL)
+        </div>
+        <div>
+            @Html.TextBox("tags", null, new { id = "tags" })
         </div>
         <input type="submit" value="Save" />
     </fieldset>
 }
+<div>
+    @Html.TextBox("tags2", null, new { id = "tags2" })
+</div>
+
+
+
+
+<link href="~/tag-it/css/jquery.tagit.css" rel="stylesheet" />
+<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/blitzer/jquery-ui.css">
+
+@section scripts {
+<script src="https://code.jquery.com/jquery-3.1.0.js" integrity="sha256-slogkvB1K3VOkzAI8QITxV3VzpOnkeNVsKvtkYLMjfk=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js" integrity="sha256-0YPKAwZP7Mp3ALMRVB2i8GXeEndvCq3eSl/WsAl1Ryk=" crossorigin="anonymous"></script>
+    <script src="~/tag-it/js/tag-it.js"></script>
+    <script>
+        $('#tags').tagit({
+            autocomplete: {
+                source: "@Url.Action("GetTags")"
+                }
+        });
+    </script>
+
+<script>
+        $('#tags2').tagit({
+            autocomplete: {
+                source: "@Url.Action("GetTags2")"
+                }
+        });
+</script>
+}
+

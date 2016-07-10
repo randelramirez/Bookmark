@@ -232,6 +232,10 @@
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="tag-it\css\jquery.tagit.css" />
+    <Content Include="tag-it\css\tagit.ui-zendesk.css" />
+    <Content Include="tag-it\js\tag-it.js" />
+    <Content Include="tag-it\js\tag-it.min.js" />
     <Content Include="Views\Bookmarks\Index.cshtml" />
     <Content Include="Views\Bookmarks\Create.cshtml" />
     <Content Include="Views\Bookmarks\Delete.cshtml" />

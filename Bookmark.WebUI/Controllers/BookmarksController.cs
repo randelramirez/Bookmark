@@ -1,12 +1,42 @@
 ﻿using Bookmark.Infrastructure;
+using System.Collections.Generic;
+using System.Data.Entity;
 using System.Net;
 using System.Web.Mvc;
+using System.Linq;
 
 namespace Bookmark.WebUI.Controllers
 {
     public class BookmarksController : Controller
     {
         private BookmarkContext dataContext = new BookmarkContext();
+
+        // for debugging and testing of tagit plugin
+        public JsonResult GetTags(string term)
+        {
+            var tags = new List<string>();
+            tags.Add("C#");
+            tags.Add("F#");
+            tags.Add("JavaScript");
+            tags.Add("Java");
+            tags.Add("Swift");
+
+            //return Json(tags.Select(b => new { label = b, value = b + " val" }).Where(t => t.label.Contains(term)), JsonRequestBehavior.AllowGet)
+            return Json(tags.Where(t => t.Contains(term)), JsonRequestBehavior.AllowGet);
+        }
+
+        // for debugging and testing of tagit plugin
+        public JsonResult GetTags2(string term)
+        {
+            var tags = new List<string>();
+            tags.Add("C#");
+            tags.Add("F#");
+            tags.Add("JavaScript");
+            tags.Add("Java");
+            tags.Add("Swift");
+
+            return Json(tags.Select(b => new { label = b, value = b + " val" }).Where(t => t.label.Contains(term)), JsonRequestBehavior.AllowGet);
+        }
 
         // GET: Bookmarks
         public ActionResult Index()
@@ -21,11 +51,18 @@ namespace Bookmark.WebUI.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Core.Bookmark bookmark)
+        public ActionResult Create(Core.Bookmark bookmark, string tags)
         {
             if (ModelState.IsValid)
             {
                 this.dataContext.Bookmarks.Add(bookmark);
+
+                // add tags logic, *refactor*, chain of responsibility?, 
+                foreach (var tag in tags.Split(','))
+                {
+                    bookmark.Tags.Add(new Core.Tag { Text = tag });
+                }
+
                 this.dataContext.SaveChanges();
                 return Redirect("Index");
             }
@@ -52,7 +89,7 @@ namespace Bookmark.WebUI.Controllers
         {
             if (ModelState.IsValid)
             {
-                this.dataContext.Entry(bookmark).State = System.Data.Entity.EntityState.Modified;
+                this.dataContext.Entry(bookmark).State = EntityState.Modified;
                 this.dataContext.SaveChanges();
                 return Redirect("Index");
             }
