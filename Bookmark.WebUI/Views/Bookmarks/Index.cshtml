@@ -5,7 +5,7 @@
 }
 
 <h2>Index</h2>
-
+@Html.ActionLink("Create New","Create")
 <table>
     <thead>
         <tr>
@@ -13,6 +13,7 @@
             <th>Title</th>
             <th>URL</th>
             <th>Tags</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -30,6 +31,7 @@
                         }
                     </ul>
                 </td>
+                <td>@Html.ActionLink("Edit","Edit", new { id = bookmark.Id }) | @Html.ActionLink("Delete","Delete", new { id = bookmark.Id }) </td>
             </tr>
         }
     </tbody>

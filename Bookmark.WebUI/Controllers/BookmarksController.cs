@@ -23,7 +23,6 @@ namespace Bookmark.WebUI.Controllers
         // GET: Bookmarks
         public ActionResult Index()
         {
-
             return View(this.dataContext.Bookmarks);
         }
 
@@ -43,7 +42,6 @@ namespace Bookmark.WebUI.Controllers
                 // add tags logic, *refactor*, chain of responsibility?, 
                 foreach (var tag in tags.Split(','))
                 {
-
                     // validate if the tag already exist in the database
                     var existingTag = this.dataContext.Tags.SingleOrDefault(t => t.Text == tag);
                     if (existingTag != null)
@@ -59,6 +57,7 @@ namespace Bookmark.WebUI.Controllers
                 this.dataContext.SaveChanges();
                 return RedirectToAction("Index");
             }
+
             return View(bookmark);
         }
 
@@ -85,36 +84,33 @@ namespace Bookmark.WebUI.Controllers
             var bookmarkCollection = this.dataContext.Bookmarks;
             if (ModelState.IsValid)
             {
-                //this.dataContext.Entry(bookmark).State = EntityState.Modified;
-                var bookmarkTags = tags.Split(',').ToList();
-                if (bookmarkTags == null  ) //if(bookmarkTags.Count > 0 ) //test which one is working
+                var bookmarkTags = string.IsNullOrEmpty(tags) ? null : tags.Split(',').ToList();
+                if (bookmarkTags == null  ) 
                 {
-                   
-                }
-       
-                foreach (var tag in bookmarkTags.ToList())
-                {
-                    var currentTagsOfBookmark = this.dataContext.Bookmarks.Single(b => b.Id == bookmark.Id).Tags.ToList();
-                    if (!currentTagsOfBookmark.Select(t => t.Text).Contains(tag))
+                    foreach (var tag in bookmarkTags.ToList())
                     {
-                        // check if the tag is new or already exists in the database
-                        var existingTag = this.dataContext.Tags.SingleOrDefault(t => t.Text == tag);
-                        if (existingTag != null)
+                        var currentTagsOfBookmark = this.dataContext.Bookmarks.Single(b => b.Id == bookmark.Id).Tags.ToList();
+                        if (!currentTagsOfBookmark.Select(t => t.Text).Contains(tag))
                         {
-                            this.dataContext.Tags.Attach(existingTag);
-                            this.dataContext.Entry(existingTag).State = EntityState.Unchanged;
-                            bookmark.Tags.Add(existingTag);
-                        }
-                        else
-                        {
-                            var newTag = new Tag { Text = tag };
-                            this.dataContext.Tags.Attach(newTag);
-                            this.dataContext.Entry(newTag).State = EntityState.Added;
-                            bookmark.Tags.Add(newTag);
+                            // check if the tag is new or already exists in the database
+                            var existingTag = this.dataContext.Tags.SingleOrDefault(t => t.Text == tag);
+                            if (existingTag != null)
+                            {
+                                this.dataContext.Tags.Attach(existingTag);
+                                this.dataContext.Entry(existingTag).State = EntityState.Unchanged;
+                                bookmark.Tags.Add(existingTag);
+                            }
+                            else
+                            {
+                                var newTag = new Tag { Text = tag };
+                                this.dataContext.Tags.Attach(newTag);
+                                this.dataContext.Entry(newTag).State = EntityState.Added;
+                                bookmark.Tags.Add(newTag);
+                            }
                         }
                     }
                 }
-
+       
                 // for removing
                 // cannot remove on the same collection while iterating through it(), this.dataContext.Bookmarks.Single(b => b.Id == bookmark.Id).Tags.Remove, perhpas put inside a list and then remove range, or assign Bookmark.Tags = new HashSet or List
                 // check if I can assign List to an ICollection
@@ -134,6 +130,7 @@ namespace Bookmark.WebUI.Controllers
                         }
                     }
                 }
+
                 tagsToRemove.ForEach(t => bookmark.Tags.Remove(t));
                 this.dataContext.Bookmarks.Attach(bookmark);
                 this.dataContext.Entry(bookmark).State = EntityState.Modified;
