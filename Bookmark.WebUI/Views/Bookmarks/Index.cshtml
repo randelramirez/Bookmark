@@ -11,7 +11,6 @@
         <tr>
             <th>Description</th>
             <th>Title</th>
-            <th>URL</th>
             <th>Tags</th>
             <th></th>
         </tr>
@@ -21,8 +20,7 @@
         {
             <tr>
                 <td>@bookmark.Description</td>
-                <td>@bookmark.Article.Title</td>
-                <td>@bookmark.Article.URL</td>
+                <td><a href="@bookmark.Article.URL" title="@bookmark.Description : @bookmark.Article.URL">@bookmark.Article.Title</a></td>
                 <td>
                     <ul>
                         @foreach (var tag in bookmark.Tags)

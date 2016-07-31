@@ -8,7 +8,7 @@
 
 @using (Html.BeginForm("Edit", "Bookmarks", FormMethod.Post))
 {
-    @Html.AntiForgeryToken();
+    @Html.AntiForgeryToken()
     <fieldset>
         <legend>Bookmarks</legend>
         <div>
@@ -21,7 +21,9 @@
         </div>
         <div>
             <label for="description">URL</label>
-            @Html.TextBoxFor(b => b.Article.URL)
+            <span>@Model.Article.URL</span>
+            @Html.HiddenFor(b => b.Article.URL)
+
         </div>
         <div>
             @*@Html.TextBox("tags", null, new { id = "tags" })*@

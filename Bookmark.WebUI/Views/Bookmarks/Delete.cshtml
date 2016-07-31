@@ -6,6 +6,7 @@
 <h2>Delete</h2>
 
 @using (Html.BeginForm("Delete","Bookmarks",FormMethod.Post)) {
+    @Html.AntiForgeryToken()
     <fieldset>
         <legend>Bookmarks</legend>
         <div>

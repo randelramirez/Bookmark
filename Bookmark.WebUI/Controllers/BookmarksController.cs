@@ -77,15 +77,13 @@ namespace Bookmark.WebUI.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Exclude = "Tags")]Core.Bookmark postedBookmark, string tags)
+        public ActionResult Edit([Bind(Exclude = "Article.URL,Tags")]Core.Bookmark postedBookmark, string tags)
         {
             var bookmark = this.dataContext.Bookmarks.Single(b => b.Id == postedBookmark.Id);
-            var tagsCollection = this.dataContext.Tags.AsNoTracking();
-            var bookmarkCollection = this.dataContext.Bookmarks;
             if (ModelState.IsValid)
             {
                 var bookmarkTags = string.IsNullOrEmpty(tags) ? null : tags.Split(',').ToList();
-                if (bookmarkTags == null  ) 
+                if (bookmarkTags != null  ) 
                 {
                     foreach (var tag in bookmarkTags.ToList())
                     {
@@ -110,28 +108,44 @@ namespace Bookmark.WebUI.Controllers
                         }
                     }
                 }
-       
-                // for removing
-                // cannot remove on the same collection while iterating through it(), this.dataContext.Bookmarks.Single(b => b.Id == bookmark.Id).Tags.Remove, perhpas put inside a list and then remove range, or assign Bookmark.Tags = new HashSet or List
-                // check if I can assign List to an ICollection
-                var tagsToRemove = new List<Tag>();
-                foreach (var tag in this.dataContext.Bookmarks.Single(b => b.Id == bookmark.Id).Tags.Select(t => t.Text))
+
+                // if there are no tags posted, then delete all tags associated with the bookmark
+                if (bookmarkTags == null)
                 {
-                    if (!bookmarkTags.Contains(tag))
+                    // find a way to simplify, bookmark.Tags  = null; perhaps or something equivalent?
+                    // I think the tags are being lazy loaded, accessed by the enumerator
+                    // load all related tags during load of the bookmark, reasearch how to load related entities ===>  var bookmark = this.dataContext.Bookmarks.Include(t => t.Tags).Single(b => b.Id == postedBookmark.Id);
+                    var tagsToRemove = new List<Tag>();
+                    foreach (var tag in bookmark.Tags)
                     {
-                        var tagToRemove = this.dataContext.Bookmarks.Single(b => b.Id == bookmark.Id).Tags.SingleOrDefault(t => t.Text == tag);
-                        
-                        if (tagToRemove != null)
+                        tagsToRemove.Add(tag);
+                    }
+                    tagsToRemove.ForEach(t => bookmark.Tags.Remove(t));
+                }
+                else
+                {
+                    // cannot remove on the same collection while iterating through it(), this.dataContext.Bookmarks.Single(b => b.Id == bookmark.Id).Tags.Remove, perhpas put inside a list and then remove range, or assign Bookmark.Tags = new HashSet or List
+                    // check if I can assign List to an ICollection
+                    var tagsToRemove = new List<Tag>();
+                    foreach (var tag in this.dataContext.Bookmarks.Single(b => b.Id == bookmark.Id).Tags.Select(t => t.Text))
+                    {
+                        if (!bookmarkTags.Contains(tag))
                         {
-                            //this.dataContext.Bookmarks.Single(b => b.Id == bookmark.Id).Tags.Remove(tagToRemove);
-                            this.dataContext.Tags.Attach(tagToRemove);
-                            this.dataContext.Entry(tagToRemove).State = EntityState.Unchanged;
-                            tagsToRemove.Add(tagToRemove);
+                            var tagToRemove = this.dataContext.Bookmarks.Single(b => b.Id == bookmark.Id).Tags.SingleOrDefault(t => t.Text == tag);
+
+                            if (tagToRemove != null)
+                            {
+                                //this.dataContext.Bookmarks.Single(b => b.Id == bookmark.Id).Tags.Remove(tagToRemove);
+                                this.dataContext.Tags.Attach(tagToRemove);
+                                this.dataContext.Entry(tagToRemove).State = EntityState.Unchanged;
+                                tagsToRemove.Add(tagToRemove);
+                            }
                         }
                     }
-                }
 
-                tagsToRemove.ForEach(t => bookmark.Tags.Remove(t));
+                    tagsToRemove.ForEach(t => bookmark.Tags.Remove(t));
+                }
+                
                 this.dataContext.Bookmarks.Attach(bookmark);
                 this.dataContext.Entry(bookmark).State = EntityState.Modified;
                 this.dataContext.SaveChanges();
@@ -169,7 +183,7 @@ namespace Bookmark.WebUI.Controllers
             }
             this.dataContext.Bookmarks.Remove(bookmark);
             this.dataContext.SaveChanges();
-            return Redirect("Index");
+            return RedirectToAction("Index");
         }
     }
 }
