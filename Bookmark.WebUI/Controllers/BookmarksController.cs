@@ -5,12 +5,14 @@ using System.Net;
 using System.Web.Mvc;
 using System.Linq;
 using Bookmark.Core;
+using Bookmark.WebUI.Services;
 
 namespace Bookmark.WebUI.Controllers
 {
     public class BookmarksController : Controller
     {
         private BookmarkContext dataContext = new BookmarkContext();
+        private BookmarkService service = new BookmarkService(new BookmarkContext());
 
         // for debugging and testing of tagit plugin
         // possibly move to Web API or other miscellaneous/utitliy/validation controller
@@ -23,7 +25,7 @@ namespace Bookmark.WebUI.Controllers
         // GET: Bookmarks
         public ActionResult Index()
         {
-            return View(this.dataContext.Bookmarks);
+            return View(this.service.GetAllBookmarks());
         }
 
         public ActionResult Create()
@@ -37,24 +39,8 @@ namespace Bookmark.WebUI.Controllers
         {
             if (ModelState.IsValid)
             {
-                this.dataContext.Bookmarks.Add(bookmark);
-
-                // add tags logic, *refactor*, chain of responsibility?, 
-                foreach (var tag in tags.Split(','))
-                {
-                    // validate if the tag already exist in the database
-                    var existingTag = this.dataContext.Tags.SingleOrDefault(t => t.Text == tag);
-                    if (existingTag != null)
-                    {
-                        bookmark.Tags.Add(existingTag);
-                    }
-                    else
-                    {
-                        bookmark.Tags.Add(new Core.Tag { Text = tag });
-                    }
-                }
-
-                this.dataContext.SaveChanges();
+                this.service.Add(bookmark, tags);
+                this.service.SaveChanges();
                 return RedirectToAction("Index");
             }
 
@@ -67,7 +53,7 @@ namespace Bookmark.WebUI.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var bookmark = this.dataContext.Bookmarks.Find(id);
+            var bookmark = this.service.GetOne(id.Value);
             if (bookmark == null)
             {
                 return HttpNotFound();
@@ -79,76 +65,11 @@ namespace Bookmark.WebUI.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Exclude = "Article.URL,Tags")]Core.Bookmark postedBookmark, string tags)
         {
-            var bookmark = this.dataContext.Bookmarks.Single(b => b.Id == postedBookmark.Id);
+            var bookmark = this.service.GetOne(postedBookmark.Id);
             if (ModelState.IsValid)
             {
-                var bookmarkTags = string.IsNullOrEmpty(tags) ? null : tags.Split(',').ToList();
-                if (bookmarkTags != null  ) 
-                {
-                    foreach (var tag in bookmarkTags.ToList())
-                    {
-                        var currentTagsOfBookmark = this.dataContext.Bookmarks.Single(b => b.Id == bookmark.Id).Tags.ToList();
-                        if (!currentTagsOfBookmark.Select(t => t.Text).Contains(tag))
-                        {
-                            // check if the tag is new or already exists in the database
-                            var existingTag = this.dataContext.Tags.SingleOrDefault(t => t.Text == tag);
-                            if (existingTag != null)
-                            {
-                                this.dataContext.Tags.Attach(existingTag);
-                                this.dataContext.Entry(existingTag).State = EntityState.Unchanged;
-                                bookmark.Tags.Add(existingTag);
-                            }
-                            else
-                            {
-                                var newTag = new Tag { Text = tag };
-                                this.dataContext.Tags.Attach(newTag);
-                                this.dataContext.Entry(newTag).State = EntityState.Added;
-                                bookmark.Tags.Add(newTag);
-                            }
-                        }
-                    }
-                }
-
-                // if there are no tags posted, then delete all tags associated with the bookmark
-                if (bookmarkTags == null)
-                {
-                    // find a way to simplify, bookmark.Tags  = null; perhaps or something equivalent?
-                    // I think the tags are being lazy loaded, accessed by the enumerator
-                    // load all related tags during load of the bookmark, reasearch how to load related entities ===>  var bookmark = this.dataContext.Bookmarks.Include(t => t.Tags).Single(b => b.Id == postedBookmark.Id);
-                    var tagsToRemove = new List<Tag>();
-                    foreach (var tag in bookmark.Tags)
-                    {
-                        tagsToRemove.Add(tag);
-                    }
-                    tagsToRemove.ForEach(t => bookmark.Tags.Remove(t));
-                }
-                else
-                {
-                    // cannot remove on the same collection while iterating through it(), this.dataContext.Bookmarks.Single(b => b.Id == bookmark.Id).Tags.Remove, perhpas put inside a list and then remove range, or assign Bookmark.Tags = new HashSet or List
-                    // check if I can assign List to an ICollection
-                    var tagsToRemove = new List<Tag>();
-                    foreach (var tag in this.dataContext.Bookmarks.Single(b => b.Id == bookmark.Id).Tags.Select(t => t.Text))
-                    {
-                        if (!bookmarkTags.Contains(tag))
-                        {
-                            var tagToRemove = this.dataContext.Bookmarks.Single(b => b.Id == bookmark.Id).Tags.SingleOrDefault(t => t.Text == tag);
-
-                            if (tagToRemove != null)
-                            {
-                                //this.dataContext.Bookmarks.Single(b => b.Id == bookmark.Id).Tags.Remove(tagToRemove);
-                                this.dataContext.Tags.Attach(tagToRemove);
-                                this.dataContext.Entry(tagToRemove).State = EntityState.Unchanged;
-                                tagsToRemove.Add(tagToRemove);
-                            }
-                        }
-                    }
-
-                    tagsToRemove.ForEach(t => bookmark.Tags.Remove(t));
-                }
-                
-                this.dataContext.Bookmarks.Attach(bookmark);
-                this.dataContext.Entry(bookmark).State = EntityState.Modified;
-                this.dataContext.SaveChanges();
+                this.service.Update(bookmark, tags);
+                this.service.SaveChanges();
                 return RedirectToAction("Index");
             }
             return View(bookmark);
@@ -160,7 +81,7 @@ namespace Bookmark.WebUI.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var bookmark = this.dataContext.Bookmarks.Find(id);
+            var bookmark = this.service.GetOne(id.Value);
             if (bookmark == null)
             {
                 return HttpNotFound();
@@ -176,13 +97,13 @@ namespace Bookmark.WebUI.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var bookmark = this.dataContext.Bookmarks.Find(id);
+            var bookmark = this.service.GetOne(id.Value);
             if (bookmark == null)
             {
                 return HttpNotFound();
             }
-            this.dataContext.Bookmarks.Remove(bookmark);
-            this.dataContext.SaveChanges();
+            this.service.Delete(bookmark);
+            this.service.SaveChanges();
             return RedirectToAction("Index");
         }
     }
