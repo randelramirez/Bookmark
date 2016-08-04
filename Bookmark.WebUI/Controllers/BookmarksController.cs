@@ -68,7 +68,7 @@ namespace Bookmark.WebUI.Controllers
             var bookmark = this.service.GetOne(postedBookmark.Id);
             if (ModelState.IsValid)
             {
-                this.service.Update(bookmark, tags);
+                this.service.Update(postedBookmark, tags);
                 this.service.SaveChanges();
                 return RedirectToAction("Index");
             }

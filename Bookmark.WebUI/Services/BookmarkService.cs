@@ -19,7 +19,7 @@ namespace Bookmark.WebUI.Services
 
         public IEnumerable<Bookmark.Core.Bookmark> GetAllBookmarks()
         {
-            return this.dataContext.Bookmarks;
+            return this.dataContext.Bookmarks.OrderBy(b => b.Article.Title);
         }
 
         public Bookmark.Core.Bookmark GetOne(int id)
@@ -29,26 +29,44 @@ namespace Bookmark.WebUI.Services
 
         public void Add(Bookmark.Core.Bookmark bookmark, string tags)
         {
-            this.dataContext.Bookmarks.Add(bookmark);
-
-            // add tags logic, *refactor*, chain of responsibility?, 
-            foreach (var tag in tags.Split(','))
+            var existingBookmark = this.dataContext.Bookmarks.SingleOrDefault(b => b.Article.URL == bookmark.Article.URL);
+            if (existingBookmark == null)
             {
-                // validate if the tag already exist in the database
-                var existingTag = this.dataContext.Tags.SingleOrDefault(t => t.Text == tag);
-                if (existingTag != null)
+                this.dataContext.Bookmarks.Add(bookmark);
+
+                // add tags logic, *refactor*, chain of responsibility?, 
+                foreach (var tag in tags.Split(','))
                 {
-                    bookmark.Tags.Add(existingTag);
+                    // validate if the tag already exist in the database
+                    var existingTag = this.dataContext.Tags.SingleOrDefault(t => t.Text == tag);
+                    if (existingTag != null)
+                    {
+                        bookmark.Tags.Add(existingTag);
+                    }
+                    else
+                    {
+                        bookmark.Tags.Add(new Core.Tag { Text = tag });
+                    }
                 }
-                else
-                {
-                    bookmark.Tags.Add(new Core.Tag { Text = tag });
-                }
+            }
+            else
+            {
+                // to do: create exception (Custom exception, or use invalid operation exception, bookmark with same url already exist)
+                // or move the validation logic to another service, BookmarkDuplicateValidator???
+                // throw error message in front-end
+
+
             }
         }
 
-        public void Update(Core.Bookmark bookmark, string tags)
+
+
+        public void Update(Core.Bookmark postedBookmark, string tags)
         {
+            var bookmark = this.GetOne(postedBookmark.Id);
+            bookmark.Article.Title = postedBookmark.Article.Title;
+            bookmark.Description = postedBookmark.Description;
+
             var bookmarkTags = string.IsNullOrEmpty(tags) ? null : tags.Split(',').ToList();
             if (bookmarkTags != null)
             {

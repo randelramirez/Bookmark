@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
@@ -21,6 +22,7 @@ namespace Bookmark.Core
         public DateTime DateSaved { get; set; }
 
         [Required]
+        [DisplayName("Brief Overview")]
         public string Description { get; set; }
 
         public Article Article { get; set; }
