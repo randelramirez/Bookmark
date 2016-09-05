@@ -12,7 +12,7 @@
         <legend>Bookmarks</legend>
         <div>
             <label for="description">Description</label>
-            @Html.TextBoxFor(b => b.Description)
+            @Html.TextAreaFor(b => b.Description)
         </div>
         <div>
             <label for="description">Title</label>
@@ -28,10 +28,6 @@
         <input type="submit" value="Save" />
     </fieldset>
 }
-
-
-
-
 
 <link href="~/tag-it/css/jquery.tagit.css" rel="stylesheet" />
 <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/blitzer/jquery-ui.css">

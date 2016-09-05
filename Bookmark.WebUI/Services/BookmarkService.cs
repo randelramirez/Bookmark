@@ -111,6 +111,9 @@ namespace Bookmark.WebUI.Services
             {
                 // cannot remove on the same collection while iterating through it(), this.dataContext.Bookmarks.Single(b => b.Id == bookmark.Id).Tags.Remove, perhpas put inside a list and then remove range, or assign Bookmark.Tags = new HashSet or List
                 // check if I can assign List to an ICollection
+
+                // to do: from the comments above, change to: var tags = this.dataContext.Bookmarks.Single(b => b.Id == bookmark.Id).Tags.Select(t => t.Text).ToList()
+                // iterate on that collection, remove  var tagsToRemove, instead do something like => context.tags.remove(tag)
                 var tagsToRemove = new List<Tag>();
                 foreach (var tag in this.dataContext.Bookmarks.Single(b => b.Id == bookmark.Id).Tags.Select(t => t.Text))
                 {

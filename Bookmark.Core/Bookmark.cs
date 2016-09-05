@@ -23,6 +23,7 @@ namespace Bookmark.Core
 
         [Required]
         [DisplayName("Brief Overview")]
+        [DataType(DataType.MultilineText)]
         public string Description { get; set; }
 
         public Article Article { get; set; }
