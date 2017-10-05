@@ -25,6 +25,7 @@ namespace Bookmark.WebUI.Controllers
         // GET: Bookmarks
         public ActionResult Index(string search)
         {
+            ViewBag.Search = search;
             var bookmarks = this.service.GetAllBookmarks();
             if (!string.IsNullOrEmpty(search))
             {
