@@ -42,6 +42,11 @@ namespace Bookmark.WebUI.Controllers
         }
 
         [HttpPost]
+        // allow html tag input, but using this attribute allows everything in this request
+        // unlike the AllowHtml attribute which is specific to a class'/model property
+        // in this case we cannot primarily because the domain classes are in Core project which should not have any references for System.Web.Mvc
+        // on solution is to create a ViewModel for the actual models or by using the ValidateInput attribute as seen below
+        [ValidateInput(false)]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Exclude = "Tags")]Core.Bookmark bookmark, string tags)
         {
