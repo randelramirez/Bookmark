@@ -23,9 +23,16 @@ namespace Bookmark.WebUI.Controllers
         }
 
         // GET: Bookmarks
-        public ActionResult Index()
+        public ActionResult Index(string search)
         {
-            return View(this.service.GetAllBookmarks());
+            var bookmarks = this.service.GetAllBookmarks();
+            if (!string.IsNullOrEmpty(search))
+            {
+                // filtering is done in application
+                // todo move the filtering of the data to the database
+                bookmarks = bookmarks.Where(b => b.Article.Title.Contains(search) || b.Tags.Select(t => t.Text).Contains(search));
+            }
+            return View(bookmarks);
         }
 
         public ActionResult Create()
@@ -35,7 +42,7 @@ namespace Bookmark.WebUI.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Exclude ="Tags")]Core.Bookmark bookmark, string tags)
+        public ActionResult Create([Bind(Exclude = "Tags")]Core.Bookmark bookmark, string tags)
         {
             if (ModelState.IsValid)
             {

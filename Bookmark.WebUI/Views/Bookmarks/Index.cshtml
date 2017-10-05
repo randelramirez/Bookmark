@@ -5,7 +5,11 @@
 }
 @Html.ActionLink("Create New", "Create")
 <h2>Index</h2>
-
+@using (Html.BeginForm("Index", "Bookmarks", FormMethod.Get))
+{
+    <input type="text" value="@ViewBag.Search" name="search" />
+    <button type="submit">Search</button>
+}
 <table>
     <thead>
         <tr>
